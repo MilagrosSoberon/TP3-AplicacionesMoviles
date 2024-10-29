@@ -13,8 +13,7 @@ import { RootStackParamList } from "../assets/types";
 
 
 type LoginScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  "index"
+  RootStackParamList
 >;
 
 const Login = () => {
