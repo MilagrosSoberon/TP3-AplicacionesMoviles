@@ -5,6 +5,8 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
+import Icon from 'react-native-vector-icons/Ionicons';
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
@@ -17,7 +19,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
+          title: 'Inicio',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
           ),
@@ -28,7 +30,7 @@ export default function TabLayout() {
         options={{
           title: 'Agregar',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+            <Icon name={focused ? 'add-circle' : 'add-circle-outline'} size={24} color={color} />
           ),
         }}
       />
@@ -37,7 +39,7 @@ export default function TabLayout() {
         options={{
           title: 'Detalles',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+            <Icon name={focused ? 'information-circle' : 'information-circle-outline'} size={24} color={color} />
           ),
         }}
       />
