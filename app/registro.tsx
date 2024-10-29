@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
+  Image,
   View,
   Text,
   TextInput,
@@ -8,6 +9,11 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedInput } from "@/components/ThemedInput";
+
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../assets/types";
@@ -47,30 +53,35 @@ const Registro = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Registro</Text>
-      <TextInput
-        style={styles.input}
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
+      headerImage={
+        <Image
+          source={require("@/assets/images/partial-react-logo.png")}
+          style={styles.reactLogo}
+        />
+      }
+    >
+    <ThemedView style={styles.container}>
+      <ThemedText style={styles.title}>Registro</ThemedText>
+      <ThemedInput
         placeholder="Nombre"
         value={nombre}
         onChangeText={setNombre}
       />
-      <TextInput
-        style={styles.input}
+      <ThemedInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
+      <ThemedInput
         placeholder="Número Celular"
         value={numeroCelular}
         onChangeText={setNumeroCelular}
         keyboardType="phone-pad"
       />
-      <TextInput
-        style={styles.input}
+      <ThemedInput
         placeholder="Código PIN"
         value={pin}
         onChangeText={setPin}
@@ -82,9 +93,10 @@ const Registro = () => {
         style={styles.buttonRegistarme}
         onPress={handleRegistro}
       >
-        <Text style={styles.buttonTextWhite}>Registrarme</Text>
+        <ThemedText style={styles.buttonTextWhite}>Registrarme</ThemedText>
       </TouchableOpacity>
-    </View>
+    </ThemedView>
+    </ParallaxScrollView>
   );
 };
 
@@ -93,6 +105,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 16,
+  },
+  reactLogo: {
+    height: 178,
+    width: 290,
+    bottom: 0,
+    left: 0,
+    position: "absolute",
   },
   title: {
     fontSize: 24,
