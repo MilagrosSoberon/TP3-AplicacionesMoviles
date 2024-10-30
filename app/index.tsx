@@ -17,30 +17,33 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../assets/types";
 
+//firebase
+import { signInWithEmailAndPassword } from "firebase/auth"; // Importa la función aquí
+import { auth } from '../firebaseConfig'; // Asegúrate de importar auth
+
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const Login = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
   const [email, setEmail] = useState("");
-  const [pin, setPin] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Credenciales hardcodeadas
     const hardcodedEmail = "usuario@example.com";
-    const hardcodedPin = "1234";
+    const hardcodedPin = "usuario1234";
 
-    if (!email || !pin) {
+    if (!email || !password) {
       Alert.alert("Error", "Por favor, complete todos los campos.");
       return;
     }
 
-    if (email === hardcodedEmail && pin === hardcodedPin) {
-      // Navegar a la pantalla de inicio
-      navigation.navigate("(tabs)");
-    } else {
-      // Mostrar un mensaje de error
-      Alert.alert("Error", "Usuario o PIN incorrectos");
+    try {
+      await signInWithEmailAndPassword(auth, email, password); // Inicia sesión con Firebase
+      navigation.navigate("(tabs)"); // Navega a la pantalla principal si el inicio es exitoso
+    } catch (error) {
+      Alert.alert("Error", (error as Error).message); // Manejo de errores
     }
   };
 
@@ -67,11 +70,11 @@ const Login = () => {
           keyboardType="email-address"
         />
         <ThemedInput
-          placeholder="PIN"
-          value={pin}
-          onChangeText={setPin}
+          placeholder="password"
+          value={password}
+          onChangeText={setPassword}
           secureTextEntry
-          keyboardType="numeric"
+          keyboardType="default"
         />
 
         {/* Botón de olvidé pin */}
@@ -104,7 +107,7 @@ const styles = StyleSheet.create({
   reactLogo: {
     height: 178,
     width: 290,
-    bottom: 0,
+    bottom: 10,
     left: 0,
     position: "absolute",
   },
