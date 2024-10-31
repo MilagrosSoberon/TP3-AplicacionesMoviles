@@ -111,25 +111,23 @@ const styles = StyleSheet.create({
   },
   reactLogo: {
     height: 178,
-    width: 290,
+    width: '80%',
     bottom: 0,
     left: 0,
     position: "absolute",
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
+    marginTop: 150,
     marginBottom: 20,
+    fontWeight: "bold",
     textAlign: "center",
   },
   input: {
     height: 40,
-    borderColor: "#ccc",
+    borderColor: "gray",
     borderWidth: 1,
     borderRadius: 5,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    width: "100%",
   },
   buttonRegistarme: {
     backgroundColor: "#007BFF", // celeste
