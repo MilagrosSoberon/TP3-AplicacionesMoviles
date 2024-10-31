@@ -18,8 +18,13 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../assets/types";
 
 //firebase
-import { signInWithEmailAndPassword } from "firebase/auth"; // Importa la función aquí
-import { auth } from '../firebaseConfig'; // Asegúrate de importar auth
+import { signInWithEmailAndPassword } from "firebase/auth"; 
+import { auth } from "../firebaseConfig"; 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+//componentes
+import validarDataLogin from "../components/validaciones/validarDataLogin";
+
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -34,13 +39,20 @@ const Login = () => {
     const hardcodedEmail = "usuario@example.com";
     const hardcodedPin = "usuario1234";
 
-    if (!email || !password) {
-      Alert.alert("Error", "Por favor, complete todos los campos.");
+    if (!validarDataLogin(email, password)) {
       return;
     }
-
     try {
-      await signInWithEmailAndPassword(auth, email, password); // Inicia sesión con Firebase
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      ); // Inicia sesión con Firebase
+      const token = await userCredential.user.getIdToken(); // Obtén el token JWT
+
+      // Almacena el token en AsyncStorage
+      await AsyncStorage.setItem("userToken", token);
+
       navigation.navigate("(tabs)"); // Navega a la pantalla principal si el inicio es exitoso
     } catch (error) {
       Alert.alert("Error", (error as Error).message); // Manejo de errores
