@@ -12,6 +12,7 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedInput } from "@/components/ThemedInput";
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -33,6 +34,8 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+
 
   const handleLogin = async () => {
     // Credenciales hardcodeadas
@@ -81,13 +84,16 @@ const Login = () => {
           onChangeText={setEmail}
           keyboardType="email-address"
         />
-        <ThemedInput
-          placeholder="password"
+       
+       <ThemedInput
+          placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
-          keyboardType="default"
+          secureTextEntry={!showPassword} // Controlar si se debe ocultar la contraseña
+          showPasswordToggle={true} 
+          onToggleShowPassword={() => setShowPassword(!showPassword)} // Alternar visibilidad
         />
+
 
         {/* Botón de olvidé pin */}
         <TouchableOpacity onPress={handleRegistro}>
@@ -118,15 +124,26 @@ const styles = StyleSheet.create({
   },
   reactLogo: {
     height: 178,
-    width: 290,
+    width: '80%',
     bottom: 10,
     left: 0,
     position: "absolute",
   },
   title: {
     fontSize: 24,
+    marginTop: 150,
     marginBottom: 20,
     textAlign: "center",
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 12,
+    paddingHorizontal: 8,
   },
   input: {
     height: 40,
@@ -134,6 +151,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     paddingLeft: 8,
+    borderRadius: 5,
   },
   buttonRestaurarPin: {
     color: "#003366", // Azul oscuro

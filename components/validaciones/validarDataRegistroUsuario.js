@@ -1,7 +1,7 @@
 import { Alert } from "react-native";
 
-const validarDataRegistroUsuario = (nombre, email, numeroCelular, pin) => {
-  if (!nombre || !email || !numeroCelular || !pin) {
+const validarDataRegistroUsuario = (nombre, email, numeroCelular, password) => {
+  if (!nombre || !email || !numeroCelular || !password) {
     Alert.alert("Error", "Por favor, completa todos los campos.");
     return false; // Salir si hay campos vacíos
   }
@@ -20,10 +20,9 @@ const validarDataRegistroUsuario = (nombre, email, numeroCelular, pin) => {
     return false;
   }
 
-  // Validar que el PIN sea de al menos 4 dígitos
-  if (pin.length < 4) {
-    Alert.alert("Error", "El código PIN debe tener al menos 4 dígitos.");
-    return false;
+  if (password.length < 6) {
+    Alert.alert("Error", "La contraseña debe tener al menos 6 caracteres.");
+    return;
   }
 
   return true; // Si todas las validaciones pasan

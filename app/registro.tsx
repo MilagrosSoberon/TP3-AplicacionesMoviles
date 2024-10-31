@@ -33,17 +33,18 @@ const Registro = () => {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [numeroCelular, setNumeroCelular] = useState("");
-  const [pin, setPin] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
 
 
   const handleRegistro = async () => {
-    if (!validarDataRegistroUsuario(nombre, email, numeroCelular, pin)) {
+    if (!validarDataRegistroUsuario(nombre, email, numeroCelular, password)) {
       return;
     }
 
     Alert.alert(
       "Registro exitoso",
-      `Nombre: ${nombre}\nEmail: ${email}\nNúmero Celular: ${numeroCelular}\nCódigo PIN: ${pin}`
+      `Nombre: ${nombre}\nEmail: ${email}\nNúmero Celular: ${numeroCelular}\nContraseña: ${password}`
     );
 
     // Espera 2 segundos antes de navegar
@@ -82,12 +83,14 @@ const Registro = () => {
         keyboardType="phone-pad"
       />
       <ThemedInput
-        placeholder="Código PIN"
-        value={pin}
-        onChangeText={setPin}
-        secureTextEntry
-        keyboardType="numeric"
-      />
+          placeholder="Contraseña"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!showPassword} // Controlar si se debe ocultar la contraseña
+          showPasswordToggle={true} 
+          onToggleShowPassword={() => setShowPassword(!showPassword)} // Alternar visibilidad
+        />
+
       {/* boton registro */}
       <TouchableOpacity
         style={styles.buttonRegistarme}
