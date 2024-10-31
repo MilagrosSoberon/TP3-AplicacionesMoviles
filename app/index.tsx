@@ -20,7 +20,7 @@ import { RootStackParamList } from "../assets/types";
 //firebase
 import { signInWithEmailAndPassword } from "firebase/auth"; 
 import { auth } from "../firebaseConfig"; 
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
 
 //componentes
 import validarDataLogin from "../components/validaciones/validarDataLogin";

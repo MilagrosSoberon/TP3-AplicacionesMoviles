@@ -1,7 +1,7 @@
-// firebaseConfig.js
 import { initializeApp } from "firebase/app";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import { initializeAuth, getAuth, getReactNativePersistence, Auth } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 
 // Tu configuración de Firebase
 const firebaseConfig = {
@@ -11,15 +11,23 @@ const firebaseConfig = {
   storageBucket: "tp3-aplicacionesmoviles.appspot.com",
   messagingSenderId: "580831365883",
   appId: "1:580831365883:web:2df00413304306696dfe5e",
-  measurementId: "G-RLNFRCQD46"
+  measurementId: "G-RLNFRCQD46",
 };
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
-// Inicializar Auth con persistencia
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
-});
+// Inicializar Auth con persistencia condicional
+let auth = Auth;
+
+if (Platform.OS === "web") {
+  // Para la web, usa la configuración predeterminada de `getAuth`
+  auth = getAuth(app);
+} else {
+  // Para dispositivos móviles, usa `initializeAuth` con persistencia `AsyncStorage`
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
+}
 
 export { app, auth };

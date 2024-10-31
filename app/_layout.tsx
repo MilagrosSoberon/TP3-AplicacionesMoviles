@@ -34,19 +34,18 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <ProtectedRoute>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="index" />
-
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="index" />
+        <ProtectedRoute>
           <Stack.Screen name="(tabs)" />
 
           <Stack.Screen name="+not-found" />
-        </Stack>
-      </ProtectedRoute>
+        </ProtectedRoute>
+      </Stack>
     </ThemeProvider>
   );
 }
