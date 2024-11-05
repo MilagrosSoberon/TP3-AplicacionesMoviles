@@ -33,6 +33,7 @@ const Registro = () => {
   const handleRegistro = async () => {
     // Validar los datos del registro
     if (!validarDataRegistroUsuario(nombre, email, numeroCelular, password)) {
+      Alert.alert('Error', 'Por favor completa todos los campos correctamente. Asegúrate de que la contraseña tenga al menos 8 caracteres, incluya números y al menos una mayúscula. Además, verifica que el email sea válido y termine en .com.');
       return;
     }
     // Hashear la contraseña
