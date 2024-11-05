@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState} from "react";
 import {
   Image,
   StyleSheet,
@@ -9,7 +9,6 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedInput } from "@/components/ThemedInput";
-
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../assets/types";
@@ -21,6 +20,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //componentes
 import validarDataLogin from "../components/validaciones/validarDataLogin";
+
+//data
+import {getUserByFirebaseId } from "@/database/database";
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -39,11 +41,21 @@ const Login = () => {
     try {
       //Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseId = userCredential.user.uid; // Obtiene el ID de Firebase
       const token = await userCredential.user.getIdToken(); //token JWT
 
       // almaceno token
       await AsyncStorage.setItem("userToken", token);
 
+      // Obtener el usuario de la base de datos local usando el firebaseId
+      const user = await getUserByFirebaseId(firebaseId); 
+
+      if (user) {
+        await AsyncStorage.setItem("userId", user.id.toString());
+        console.log("Usuario recuperado:", user);
+    } else {
+        console.warn("No se encontró el usuario en la base de datos local");
+    }
       navigation.navigate("(tabs)"); 
     } catch (error) {
       Alert.alert("Error, la combinación de usuario y contraseña es incorrecta", (error as Error).message); 
