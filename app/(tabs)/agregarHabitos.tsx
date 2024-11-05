@@ -7,6 +7,8 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { initializeDatabase, addHabit, getImportanceLevels } from '@/database/database';
 import { Picker } from '@react-native-picker/picker';
 import { ThemedInput } from '@/components/ThemedInput';
+import { ThemedPicker } from '@/components/ThemedPicker';
+
 
 const AgregarHabitosScreen = () => {
   const [habitName, setHabitName] = useState<string>('');
@@ -53,7 +55,7 @@ const AgregarHabitosScreen = () => {
       }
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText style={styles.title}>Agregar nuevos hábitos con validación</ThemedText>
+        <ThemedText type='title'>Agregar nuevos hábitos con validación</ThemedText>
       </ThemedView>
       
       <View style={styles.formContainer}>
@@ -65,16 +67,18 @@ const AgregarHabitosScreen = () => {
         
         {/* Contenedor para el Picker con borde blanco */}
         <View style={styles.pickerContainer}>
-          <Picker
+          <ThemedPicker
             selectedValue={habitImportance}
-            style={styles.picker}
-            onValueChange={(itemValue) => setHabitImportance(itemValue)}
+            onValueChange={(itemValue) => {
+              const value = itemValue !== undefined ? Number(itemValue) : undefined;
+              setHabitImportance(value);
+            }}
           >
             <Picker.Item label="Seleccione un nivel de importancia" value={undefined} />
             {importanceLevels.map(level => (
               <Picker.Item key={level.id} label={level.nombre} value={level.id} />
             ))}
-          </Picker>
+          </ThemedPicker>
         </View>
 
         <ThemedInput
@@ -117,17 +121,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)', 
   },
   pickerContainer: {
-    borderColor: '#FFFFFF', 
-    borderWidth: 1,
     borderRadius: 5,
     marginBottom: 12,
     overflow: 'hidden', 
   },
-  picker: {
-    height: 50,
-    width: '100%',
-    color: '#FFFFFF',
-  },
+
 });
 
 export default AgregarHabitosScreen;
