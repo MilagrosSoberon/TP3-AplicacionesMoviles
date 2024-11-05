@@ -1,81 +1,95 @@
 import React, { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, Alert, TextInput, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Alert,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Modal,
+} from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { RouteProp } from "@react-navigation/native"; 
+import { RouteProp } from "@react-navigation/native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { getHabitById, updateHabit, deleteHabit } from '@/database/database'; 
+import { ThemedInput } from "@/components/ThemedInput";
+import ImportanceChip from "@/components/ImportanceChip";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
-// Definición de la interfaz Habit
-interface Habit {
-  id: number;
-  nombre: string;
-  descripcion?: string; 
-}
+//data
+import {
+  getHabits,
+  getHabitById,
+  updateHabit,
+  deleteHabit,
+} from "@/database/database";
 
-type RootStackParamList = {
-  DetallesHabitos: { habitId: number };
-};
+export default function DetallesHabitosScreen() {
+  // Definición de la interfaz Habit
+  type Habit = {
+    id: number;
+    idUsuario: number;
+    idNivelImportancia: number;
+    nombre: string;
+    descripcion?: string;
+  };
 
-type RouteParams = RouteProp<RootStackParamList, 'DetallesHabitos'>;
+  const iconColor = useThemeColor({}, "text");
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
 
-
-const DetallesHabitosScreen: React.FC = () => {
-  const navigation = useNavigation();
-  const route = useRoute<RouteParams>(); 
-  const habitId = route.params?.habitId; 
-
-  const [habit, setHabit] = useState<Habit | null>(null); 
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
 
+  // carga los habitos
+  const loadHabits = async () => {
+    const fetchedHabits = await getHabits();
+    setHabits(fetchedHabits);
+  };
 
   useEffect(() => {
-    if (habitId) {
-      const loadHabit = async () => {
-        const fetchedHabit = await getHabitById(habitId); 
-        if (fetchedHabit) {
-          setHabit(fetchedHabit);
-          setNombre(fetchedHabit.nombre);
-          setDescripcion(fetchedHabit.descripcion || "");
-        }
-      };
-
-      loadHabit();
-    }
-  }, [habitId]);
+    loadHabits();
+  }, []);
 
   const handleUpdate = async () => {
     if (!nombre) {
       Alert.alert("Error", "El nombre no puede estar vacío.");
       return;
     }
-
-    await updateHabit(habitId!, nombre, descripcion); 
+    await updateHabit(selectedHabit!.id, nombre, descripcion);
     Alert.alert("Éxito", "Hábito actualizado con éxito.");
-    navigation.goBack();
+    loadHabits();
+    setModalVisible(false); // Cerrar modal
+    setNombre(""); // Resetear campos
+    setDescripcion("");
+    setSelectedHabit(null);
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (id: number) => {
     Alert.alert(
       "Eliminar Hábito",
       "¿Estás seguro de que deseas eliminar este hábito?",
       [
         { text: "Cancelar", style: "cancel" },
-        { text: "Eliminar", onPress: async () => {
-            await deleteHabit(habitId!); 
+        {
+          text: "Eliminar",
+          onPress: async () => {
+            await deleteHabit(id);
             Alert.alert("Éxito", "Hábito eliminado con éxito.");
-            navigation.goBack(); 
-          }
-        }
+            loadHabits();
+          },
+        },
       ]
     );
   };
-
-  if (!habit) return null; 
-
+  const openUpdateModal = (habit: Habit) => {
+    setSelectedHabit(habit);
+    setNombre(habit.nombre);
+    setDescripcion(habit.descripcion || "");
+    setModalVisible(true);
+  };
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
@@ -85,26 +99,63 @@ const DetallesHabitosScreen: React.FC = () => {
     >
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Detalles del Hábito</ThemedText>
-        <TextInput
-          style={styles.input}
-          placeholder="Nombre del hábito"
-          value={nombre}
-          onChangeText={setNombre}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Descripción"
-          value={descripcion}
-          onChangeText={setDescripcion}
-        />
-        
-        <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-          <ThemedText style={styles.buttonText}>Actualizar</ThemedText>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={handleDelete}>
-          <ThemedText style={styles.buttonText}>Eliminar</ThemedText>
-        </TouchableOpacity>
+        {habits.map((item) => (
+          <TouchableOpacity key={item.id} style={styles.habitItem}>
+            <View style={styles.habitContent}>
+              <ThemedText style={styles.habitName}>{item.nombre}</ThemedText>
+              <ThemedText style={styles.habitDescription}>
+                {item.descripcion}
+              </ThemedText>
+            </View>
+            <TouchableOpacity
+              onPress={() => openUpdateModal(item)}
+              style={styles.button}
+            >
+              <ThemedText style={styles.buttonText}>Actualizar</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleDelete(item.id)}
+              style={[styles.button, styles.deleteButton]}
+            >
+              <ThemedText style={styles.buttonText}>Eliminar</ThemedText>
+            </TouchableOpacity>
+            <ImportanceChip level={item.idNivelImportancia} />
+          </TouchableOpacity>
+        ))}
+        {/* Modal para actualizar hábitos */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <ThemedText type="title">Actualizar Hábito</ThemedText>
+              <ThemedInput
+                placeholder="Nombre del hábito"
+                value={nombre}
+                onChangeText={setNombre}
+              />
+              <ThemedInput
+                placeholder="Descripción"
+                value={descripcion}
+                onChangeText={setDescripcion}
+              />
+              <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+                <ThemedText style={styles.buttonText}>
+                  Guardar Cambios
+                </ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.deleteButton]}
+                onPress={() => setModalVisible(false)}
+              >
+                <ThemedText style={styles.buttonText}>Cancelar</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </ThemedView>
     </ParallaxScrollView>
   );
@@ -132,20 +183,60 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#007BFF",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
+    marginLeft: 5,
   },
   deleteButton: {
-    backgroundColor: "#FF4C4C", 
+    backgroundColor: "#FF4C4C",
   },
   buttonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
   },
+  habitItem: {
+    padding: 16,
+    marginVertical: 8,
+    borderRadius: 8,
+    backgroundColor: "#f9f9f9",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  habitContent: {
+    marginRight: 10,
+  },
+  habitName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  habitDescription: {
+    fontSize: 14,
+    color: "#666",
+  },
+  // Estilos para el modal
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    paddingVertical: "20%",
+    paddingHorizontal: "10%",
+    //borderRadius: "10%",
+  },
 });
-
-export default DetallesHabitosScreen;
