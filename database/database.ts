@@ -143,3 +143,37 @@ type Habit = {
       return false;
     }
  };
+
+ // database.ts
+ export const getHabitById = async (id: number): Promise<Habit | null> => {
+  const database = await db;
+  try {
+    // Llama a getFirstAsync con la consulta y los parámetros
+    const result = await database.getFirstAsync('SELECT * FROM Habito WHERE id = ?', [id]);
+    return result as Habit | null; // Devuelve el hábito encontrado o null si no se encuentra
+  } catch (error) {
+    console.error("Error al obtener el hábito:", error);
+    return null;
+  }
+};
+export const updateHabit = async (id: number, nombre: string, descripcion: string): Promise<boolean> => {
+  const database = await db;
+  try {
+    await database.runAsync('UPDATE Habito SET nombre = ?, descripcion = ? WHERE id = ?', [nombre, descripcion, id]);
+    return true;
+  } catch (error) {
+    console.error("Error al actualizar el hábito:", error);
+    return false;
+  }
+};
+
+export const deleteHabit = async (id: number): Promise<boolean> => {
+  const database = await db;
+  try {
+    await database.runAsync('DELETE FROM Habito WHERE id = ?', [id]);
+    return true;
+  } catch (error) {
+    console.error("Error al eliminar el hábito:", error);
+    return false;
+  }
+};
