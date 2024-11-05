@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TouchableOpacity, FlatList, Alert, View } from "react-native";
+import { Image, StyleSheet, TouchableOpacity, Alert, View, RefreshControl , ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../assets/types";
@@ -27,6 +27,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<ScreenNavigationProp>();
   const iconColor = useThemeColor({}, 'text');
   const [habits, setHabits] = useState<Habit[]>([]); // almacena los hábitos
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleLogout = () => {
     navigation.navigate("index");
@@ -42,17 +43,6 @@ export default function HomeScreen() {
     loadHabits(); 
   }, []);
 
-  // Maneja el evento de agregar un nuevo hábito
-  const handleAddHabit = async (habitName: string, habitImportance: number, habitDescription: string) => {
-    const success = await addHabit(habitName, habitImportance, habitDescription);
-    if (success) {
-      Alert.alert('Éxito', 'Hábito agregado con éxito.');
-      loadHabits(); 
-    } else {
-      Alert.alert('Error', 'Error al agregar hábito.');
-    }
-  };
-
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
@@ -62,11 +52,22 @@ export default function HomeScreen() {
         />
       }
     >
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={loadHabits} // Llama a loadHabits al refrescar
+          />
+        }
+      >
       <ThemedView style={styles.titleContainer}>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <Icon name="log-out-outline" size={24} color={iconColor} />
         </TouchableOpacity>
         <ThemedText style={styles.title}>Listado de hábitos actuales</ThemedText>
+        <TouchableOpacity onPress={loadHabits} style={styles.refreshButton}>
+          <Icon name="refresh-outline" size={24} color={iconColor} />
+        </TouchableOpacity>
       </ThemedView>
 
       {/* Lista de hábitos */}
@@ -79,8 +80,7 @@ export default function HomeScreen() {
           <ImportanceChip level={item.idNivelImportancia} />
         </TouchableOpacity>
       ))}
-     
-
+      </ScrollView>
     </ParallaxScrollView>
   );
 }
@@ -102,6 +102,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     right: 0,
+  },
+  refreshButton: {
+    position: "absolute",
+    top: 10,
+    right: 50,
   },
   habitItem: {
     padding: 16,

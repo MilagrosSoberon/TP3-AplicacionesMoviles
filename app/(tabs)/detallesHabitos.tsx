@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   View,
   Modal,
+  RefreshControl , ScrollView
 } from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { RouteProp } from "@react-navigation/native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -36,6 +38,7 @@ export default function DetallesHabitosScreen() {
   };
 
   const iconColor = useThemeColor({}, "text");
+  const [refreshing, setRefreshing] = useState(false);
   const [habits, setHabits] = useState<Habit[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
@@ -97,8 +100,19 @@ export default function DetallesHabitosScreen() {
         <Ionicons size={310} name="code-slash" style={styles.headerImage} />
       }
     >
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={loadHabits} // Llama a loadHabits al refrescar
+          />
+        }
+      >
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Detalles del Hábito</ThemedText>
+        <TouchableOpacity onPress={loadHabits} style={styles.refreshButton}>
+          <Icon name="refresh-outline" size={24} color={iconColor} />
+        </TouchableOpacity>
         {habits.map((item) => (
           <TouchableOpacity key={item.id} style={styles.habitItem}>
             <View style={styles.habitContent}>
@@ -157,6 +171,7 @@ export default function DetallesHabitosScreen() {
           </View>
         </Modal>
       </ThemedView>
+      </ScrollView>
     </ParallaxScrollView>
   );
 }
@@ -172,6 +187,11 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: "column",
     padding: 16,
+  },
+  refreshButton: {
+    position: "absolute",
+    top: 10,
+    right: 0,
   },
   input: {
     height: 40,
