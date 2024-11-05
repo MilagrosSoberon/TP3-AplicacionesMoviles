@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Image,
-  View,
-  TextInput,
   StyleSheet,
-  Text,
   Alert,
   TouchableOpacity,
 } from "react-native";
@@ -25,39 +22,31 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 //componentes
 import validarDataLogin from "../components/validaciones/validarDataLogin";
 
-
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const Login = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
 
-
   const handleLogin = async () => {
-    // Credenciales hardcodeadas
-    const hardcodedEmail = "usuario@example.com";
-    const hardcodedPin = "usuario1234";
-
     if (!validarDataLogin(email, password)) {
+      Alert.alert("Error", "Por favor completa todos los campos.");
       return;
     }
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      ); // Inicia sesión con Firebase
-      const token = await userCredential.user.getIdToken(); // Obtén el token JWT
 
-      // Almacena el token en AsyncStorage
+    try {
+      //Firebase
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const token = await userCredential.user.getIdToken(); //token JWT
+
+      // almaceno token
       await AsyncStorage.setItem("userToken", token);
 
-      navigation.navigate("(tabs)"); // Navega a la pantalla principal si el inicio es exitoso
+      navigation.navigate("(tabs)"); 
     } catch (error) {
-      Alert.alert("Error", (error as Error).message); // Manejo de errores
+      Alert.alert("Error, la combinación de usuario y contraseña es incorrecta", (error as Error).message); 
     }
   };
 
@@ -84,7 +73,7 @@ const Login = () => {
           keyboardType="email-address"
         />
        
-       <ThemedInput
+        <ThemedInput
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
@@ -92,7 +81,6 @@ const Login = () => {
           showPasswordToggle={true} 
           onToggleShowPassword={() => setShowPassword(!showPassword)} // Alternar visibilidad
         />
-
 
         {/* Botón de olvidé pin */}
         <TouchableOpacity onPress={handleRegistro}>
@@ -135,12 +123,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
-  input: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-  },
   buttonRestaurarPin: {
     color: "#003366", // Azul oscuro
     textDecorationLine: "underline",
@@ -165,11 +147,6 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     textAlign: "center",
     marginTop: 20,
-  },
-  buttonTextBlack: {
-    color: "#000000", // negro
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
 
