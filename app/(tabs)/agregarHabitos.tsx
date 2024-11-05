@@ -94,8 +94,8 @@ const AgregarHabitosScreen = () => {
       }
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">
-          Agregar nuevos hábitos con validación
+      <ThemedText type="subtitle" style={{ marginTop: 40 }}>
+          Agregar nuevos hábitos
         </ThemedText>
       </ThemedView>
 
