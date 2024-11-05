@@ -19,10 +19,12 @@ import { ThemedInput } from "@/components/ThemedInput";
 import ImportanceChip from "@/components/ImportanceChip";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
+//firebase
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 //data
 import {
-  getHabits,
-  getHabitById,
+  getHabitByIdUser,
   updateHabit,
   deleteHabit,
 } from "@/database/database";
@@ -46,11 +48,30 @@ export default function DetallesHabitosScreen() {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
 
-  // carga los habitos
-  const loadHabits = async () => {
-    const fetchedHabits = await getHabits();
-    setHabits(fetchedHabits);
-  };
+ // carga los habitos
+ const loadHabits = async () => {
+  try {
+    // Obtener el Firebase ID del almacenamiento
+    const firebaseId = await AsyncStorage.getItem("userId");
+    console.log("Número Usuario de Firebase:", firebaseId);
+
+    if (firebaseId) {
+      // Usar el firebaseId para obtener los hábitos
+      const fetchedHabits = await getHabitByIdUser(firebaseId); 
+      console.log("Hábitos recuperados:", fetchedHabits); 
+
+      if (fetchedHabits && fetchedHabits.length > 0) {
+        setHabits(fetchedHabits); // Establece los hábitos
+      } else {
+        console.warn("No existen hábitos para este usuario");
+      }
+    } else {
+      console.warn("No se encontró ningún ID de Firebase en AsyncStorage");
+    }
+  } catch (error) {
+    console.error("Error al cargar los hábitos:", error);
+  }
+};
 
   useEffect(() => {
     loadHabits();

@@ -4,10 +4,15 @@ import { useState, useEffect } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { initializeDatabase, addHabit, getImportanceLevels } from '@/database/database';
 import { Picker } from '@react-native-picker/picker';
 import { ThemedInput } from '@/components/ThemedInput';
 import { ThemedPicker } from '@/components/ThemedPicker';
+
+//firebase
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Asegúrate de importar AsyncStorage
+
+//data
+import { initializeDatabase, addHabit, getImportanceLevels } from '@/database/database';
 
 
 const AgregarHabitosScreen = () => {
@@ -32,15 +37,30 @@ const AgregarHabitosScreen = () => {
       return;
     }
 
-    const success = await addHabit(habitName, habitImportance, habitDescription);
-    if (success) {
-      Alert.alert('Éxito', `Hábito agregado con éxito.`);
-      // limpia los campos
-      setHabitName('');
-      setHabitImportance(undefined);
-      setHabitDescription('');
-    } else {
-      Alert.alert('Error', 'Error al agregar hábito.');
+    try {
+      // Obtener el ID del usuario desde AsyncStorage
+      const userId = await AsyncStorage.getItem("userId");
+      console.log("ID de usuario:", userId); // Para verificar que se obtiene el ID correctamente
+
+      if (!userId) {
+        Alert.alert('Error', 'No se encontró el ID de usuario.');
+        return;
+      }
+
+      // Llamar a addHabit con el ID de usuario
+      const success = await addHabit(userId, habitName, habitImportance, habitDescription);
+      if (success) {
+        Alert.alert('Éxito', `Hábito agregado con éxito.`);
+        // Limpiar los campos
+        setHabitName('');
+        setHabitImportance(undefined);
+        setHabitDescription('');
+      } else {
+        Alert.alert('Error', 'Error al agregar hábito.');
+      }
+    } catch (error) {
+      console.error("Error al agregar hábito:", error);
+      Alert.alert('Error', 'Hubo un problema al agregar el hábito.');
     }
   };
 

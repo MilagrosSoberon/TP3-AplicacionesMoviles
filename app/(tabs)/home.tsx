@@ -1,4 +1,12 @@
-import { Image, StyleSheet, TouchableOpacity, Alert, View, RefreshControl , ScrollView } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  View,
+  RefreshControl,
+  ScrollView,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../assets/types";
@@ -8,10 +16,17 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import Icon from "react-native-vector-icons/Ionicons";
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { useEffect, useState } from "react";
-import { getHabits, addHabit } from '@/database/database'; 
-import ImportanceChip from '@/components/ImportanceChip'; 
+import ImportanceChip from "@/components/ImportanceChip";
+
+//firebase
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+//data
+import { getHabitByIdUser } from "@/database/database";
+import { getUsuarios, getUserByFirebaseId } from "@/database/database";
+import { getNumericIdByFirebaseId } from "@/database/database";
 
 type ScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -25,7 +40,7 @@ type Habit = {
 
 export default function HomeScreen() {
   const navigation = useNavigation<ScreenNavigationProp>();
-  const iconColor = useThemeColor({}, 'text');
+  const iconColor = useThemeColor({}, "text");
   const [habits, setHabits] = useState<Habit[]>([]); // almacena los hábitos
   const [refreshing, setRefreshing] = useState(false);
 
@@ -34,22 +49,39 @@ export default function HomeScreen() {
   };
 
   // carga los habitos
-  const loadHabits = async () => {
-    const fetchedHabits = await getHabits();
-    setHabits(fetchedHabits);
-  };
+ const loadHabits = async () => {
+  try {
+    // Obtener el Firebase ID del almacenamiento
+    const firebaseId = await AsyncStorage.getItem("userId");
+    console.log("Número Usuario de Firebase:", firebaseId);
+
+    if (firebaseId) {
+      // Usar el firebaseId para obtener los hábitos
+      const fetchedHabits = await getHabitByIdUser(firebaseId); 
+      console.log("Hábitos recuperados:", fetchedHabits); 
+
+      if (fetchedHabits && fetchedHabits.length > 0) {
+        setHabits(fetchedHabits); // Establece los hábitos
+      } else {
+        console.warn("No existen hábitos para este usuario");
+      }
+    } else {
+      console.warn("No se encontró ningún ID de Firebase en AsyncStorage");
+    }
+  } catch (error) {
+    console.error("Error al cargar los hábitos:", error);
+  }
+};
 
   useEffect(() => {
-    loadHabits(); 
+    loadHabits();
   }, []);
 
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
       headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-        />
+        <Image source={require("@/assets/images/partial-react-logo.png")} />
       }
     >
       <ScrollView
@@ -60,26 +92,30 @@ export default function HomeScreen() {
           />
         }
       >
-      <ThemedView style={styles.titleContainer}>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <Icon name="log-out-outline" size={24} color={iconColor} />
-        </TouchableOpacity>
-        <ThemedText style={styles.title}>Listado de hábitos actuales</ThemedText>
-        <TouchableOpacity onPress={loadHabits} style={styles.refreshButton}>
-          <Icon name="refresh-outline" size={24} color={iconColor} />
-        </TouchableOpacity>
-      </ThemedView>
+        <ThemedView style={styles.titleContainer}>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Icon name="log-out-outline" size={24} color={iconColor} />
+          </TouchableOpacity>
+          <ThemedText style={styles.title}>
+            Listado de hábitos actuales
+          </ThemedText>
+          <TouchableOpacity onPress={loadHabits} style={styles.refreshButton}>
+            <Icon name="refresh-outline" size={24} color={iconColor} />
+          </TouchableOpacity>
+        </ThemedView>
 
-      {/* Lista de hábitos */}
-      {habits.map(item => (
-        <TouchableOpacity key={item.id} style={styles.habitItem}>
-          <View style={styles.habitContent}>
-            <ThemedText style={styles.habitName}>{item.nombre}</ThemedText>
-            <ThemedText style={styles.habitDescription}>{item.descripcion}</ThemedText>
-          </View>
-          <ImportanceChip level={item.idNivelImportancia} />
-        </TouchableOpacity>
-      ))}
+        {/* Lista de hábitos */}
+        {habits.map((item) => (
+          <TouchableOpacity key={item.id} style={styles.habitItem}>
+            <View style={styles.habitContent}>
+              <ThemedText style={styles.habitName}>{item.nombre}</ThemedText>
+              <ThemedText style={styles.habitDescription}>
+                {item.descripcion}
+              </ThemedText>
+            </View>
+            <ImportanceChip level={item.idNivelImportancia} />
+          </TouchableOpacity>
+        ))}
       </ScrollView>
     </ParallaxScrollView>
   );
@@ -112,8 +148,8 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-    shadowColor: '#000',
+    backgroundColor: "#f9f9f9",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -121,21 +157,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'space-between'
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   habitContent: {
-    flex: 1, 
-    marginRight: 10, 
+    flex: 1,
+    marginRight: 10,
   },
   habitName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333'
+    fontWeight: "bold",
+    color: "#333",
   },
   habitDescription: {
     fontSize: 14,
-    color: '#666'
-  }
+    color: "#666",
+  },
 });
