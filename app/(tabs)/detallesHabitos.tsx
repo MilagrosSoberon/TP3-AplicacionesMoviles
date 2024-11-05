@@ -7,17 +7,20 @@ import {
   TouchableOpacity,
   View,
   Modal,
-  RefreshControl , ScrollView
+  RefreshControl,
+  ScrollView,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { RouteProp } from "@react-navigation/native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { Picker } from "@react-native-picker/picker";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedInput } from "@/components/ThemedInput";
 import ImportanceChip from "@/components/ImportanceChip";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { ThemedPicker } from "@/components/ThemedPicker";
 
 //firebase
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -25,6 +28,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 //data
 import {
   getHabitByIdUser,
+  getImportanceLevels,
   updateHabit,
   deleteHabit,
 } from "@/database/database";
@@ -42,39 +46,52 @@ export default function DetallesHabitosScreen() {
   const iconColor = useThemeColor({}, "text");
   const [refreshing, setRefreshing] = useState(false);
   const [habits, setHabits] = useState<Habit[]>([]);
+  const [habitImportance, setHabitImportance] = useState<number | undefined>(
+    undefined
+  );
+  const [importanceLevels, setImportanceLevels] = useState<
+    { id: number; nombre: string }[]
+  >([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
 
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
 
- // carga los habitos
- const loadHabits = async () => {
-  try {
-    // Obtener el Firebase ID del almacenamiento
-    const firebaseId = await AsyncStorage.getItem("userId");
-    console.log("Número Usuario de Firebase:", firebaseId);
 
-    if (firebaseId) {
-      // Usar el firebaseId para obtener los hábitos
-      const fetchedHabits = await getHabitByIdUser(firebaseId); 
-      console.log("Hábitos recuperados:", fetchedHabits); 
+  // carga los habitos
+  const loadHabits = async () => {
+    try {
+      // Obtener el Firebase ID del almacenamiento
+      const firebaseId = await AsyncStorage.getItem("userId");
+      console.log("Número Usuario de Firebase:", firebaseId);
 
-      if (fetchedHabits && fetchedHabits.length > 0) {
-        setHabits(fetchedHabits); // Establece los hábitos
+      if (firebaseId) {
+        // Usar el firebaseId para obtener los hábitos
+        const fetchedHabits = await getHabitByIdUser(firebaseId);
+        console.log("Hábitos recuperados:", fetchedHabits);
+
+        if (fetchedHabits && fetchedHabits.length > 0) {
+          setHabits(fetchedHabits); // Establece los hábitos
+        } else {
+          console.warn("No existen hábitos para este usuario");
+        }
       } else {
-        console.warn("No existen hábitos para este usuario");
+        console.warn("No se encontró ningún ID de Firebase en AsyncStorage");
       }
-    } else {
-      console.warn("No se encontró ningún ID de Firebase en AsyncStorage");
+    } catch (error) {
+      console.error("Error al cargar los hábitos:", error);
     }
-  } catch (error) {
-    console.error("Error al cargar los hábitos:", error);
-  }
-};
+  };
 
+  const loadHabitImportance = async () => {
+    const levels = await getImportanceLevels();
+      setImportanceLevels(levels);
+  };
+  
   useEffect(() => {
     loadHabits();
+    loadHabitImportance();
   }, []);
 
   const handleUpdate = async () => {
@@ -82,12 +99,22 @@ export default function DetallesHabitosScreen() {
       Alert.alert("Error", "El nombre no puede estar vacío.");
       return;
     }
-    await updateHabit(selectedHabit!.id, nombre, descripcion);
+    if (habitImportance !== undefined) {
+      await updateHabit(
+        selectedHabit!.id,
+        habitImportance,
+        nombre,
+        descripcion
+      );
+    } else {
+      Alert.alert("Error", "Debe seleccionar un nivel de importancia.");
+    }
     Alert.alert("Éxito", "Hábito actualizado con éxito.");
     loadHabits();
     setModalVisible(false); // Cerrar modal
     setNombre(""); // Resetear campos
     setDescripcion("");
+    setHabitImportance(undefined);
     setSelectedHabit(null);
   };
 
@@ -112,6 +139,7 @@ export default function DetallesHabitosScreen() {
     setSelectedHabit(habit);
     setNombre(habit.nombre);
     setDescripcion(habit.descripcion || "");
+    setHabitImportance(habit.idNivelImportancia);
     setModalVisible(true);
   };
   return (
@@ -129,69 +157,91 @@ export default function DetallesHabitosScreen() {
           />
         }
       >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Detalles del Hábito</ThemedText>
-        <TouchableOpacity onPress={loadHabits} style={styles.refreshButton}>
-          <Icon name="refresh-outline" size={24} color={iconColor} />
-        </TouchableOpacity>
-        {habits.map((item) => (
-          <TouchableOpacity key={item.id} style={styles.habitItem}>
-            <View style={styles.habitContent}>
-              <ThemedText style={styles.habitName}>{item.nombre}</ThemedText>
-              <ThemedText style={styles.habitDescription}>
-                {item.descripcion}
-              </ThemedText>
-            </View>
-            <TouchableOpacity
-              onPress={() => openUpdateModal(item)}
-              style={styles.button}
-            >
-              <ThemedText style={styles.buttonText}>Actualizar</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleDelete(item.id)}
-              style={[styles.button, styles.deleteButton]}
-            >
-              <ThemedText style={styles.buttonText}>Eliminar</ThemedText>
-            </TouchableOpacity>
-            <ImportanceChip level={item.idNivelImportancia} />
+        <ThemedView style={styles.titleContainer}>
+          <ThemedText type="title">Detalles del Hábito</ThemedText>
+          <TouchableOpacity onPress={loadHabits} style={styles.refreshButton}>
+            <Icon name="refresh-outline" size={24} color={iconColor} />
           </TouchableOpacity>
-        ))}
-        {/* Modal para actualizar hábitos */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <ThemedText type="title">Actualizar Hábito</ThemedText>
-              <ThemedInput
-                placeholder="Nombre del hábito"
-                value={nombre}
-                onChangeText={setNombre}
-              />
-              <ThemedInput
-                placeholder="Descripción"
-                value={descripcion}
-                onChangeText={setDescripcion}
-              />
-              <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-                <ThemedText style={styles.buttonText}>
-                  Guardar Cambios
+          {habits.map((item) => (
+            <TouchableOpacity key={item.id} style={styles.habitItem}>
+              <View style={styles.habitContent}>
+                <ThemedText style={styles.habitName}>{item.nombre}</ThemedText>
+                <ThemedText style={styles.habitDescription}>
+                  {item.descripcion}
                 </ThemedText>
+              </View>
+              <TouchableOpacity
+                onPress={() => openUpdateModal(item)}
+                style={styles.button}
+              >
+                <ThemedText style={styles.buttonText}>Actualizar</ThemedText>
               </TouchableOpacity>
               <TouchableOpacity
+                onPress={() => handleDelete(item.id)}
                 style={[styles.button, styles.deleteButton]}
-                onPress={() => setModalVisible(false)}
               >
-                <ThemedText style={styles.buttonText}>Cancelar</ThemedText>
+                <ThemedText style={styles.buttonText}>Eliminar</ThemedText>
               </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      </ThemedView>
+              <ImportanceChip level={item.idNivelImportancia} />
+            </TouchableOpacity>
+          ))}
+          {/* Modal para actualizar hábitos */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <ThemedView style={styles.modalContainer}>
+              <ThemedView style={styles.modalContent}>
+                <ThemedText type="title">Actualizar Hábito</ThemedText>
+                <ThemedInput
+                  placeholder="Nombre del hábito"
+                  value={nombre}
+                  onChangeText={setNombre}
+                />
+                <ThemedInput
+                  placeholder="Descripción"
+                  value={descripcion}
+                  onChangeText={setDescripcion}
+                />
+                <ThemedView style={styles.pickerContainer}>
+                  <ThemedPicker
+                    selectedValue={habitImportance}
+                    onValueChange={(itemValue) => {
+                      const value =
+                        itemValue !== undefined ? Number(itemValue) : undefined;
+                      setHabitImportance(value);
+                    }}
+                  >
+                    <Picker.Item
+                      label="Seleccione un nivel de importancia"
+                      value={undefined}
+                    />
+                    {importanceLevels.map((level) => (
+                      <Picker.Item
+                        key={level.id}
+                        label={level.nombre}
+                        value={level.id}
+                      />
+                    ))}
+                  </ThemedPicker>
+                </ThemedView>
+                <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+                  <ThemedText style={styles.buttonText}>
+                    Guardar Cambios
+                  </ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, styles.deleteButton]}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <ThemedText style={styles.buttonText}>Cancelar</ThemedText>
+                </TouchableOpacity>
+              </ThemedView>
+            </ThemedView>
+          </Modal>
+        </ThemedView>
       </ScrollView>
     </ParallaxScrollView>
   );
@@ -275,9 +325,12 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "80%",
-    backgroundColor: "#fff",
     paddingVertical: "20%",
     paddingHorizontal: "10%",
-    //borderRadius: "10%",
+  },
+  pickerContainer: {
+    borderRadius: 5,
+    marginBottom: 12,
+    overflow: "hidden",
   },
 });

@@ -1,25 +1,39 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { StyleSheet, Alert, TextInput, Button, View, Image } from 'react-native';
-import { useState, useEffect } from 'react';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import {
+  StyleSheet,
+  Alert,
+  TextInput,
+  Button,
+  View,
+  Image,
+} from "react-native";
+import { useState, useEffect } from "react";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { Picker } from '@react-native-picker/picker';
-import { ThemedInput } from '@/components/ThemedInput';
-import { ThemedPicker } from '@/components/ThemedPicker';
+import { Picker } from "@react-native-picker/picker";
+import { ThemedInput } from "@/components/ThemedInput";
+import { ThemedPicker } from "@/components/ThemedPicker";
 
 //firebase
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Asegúrate de importar AsyncStorage
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Asegúrate de importar AsyncStorage
 
 //data
-import { initializeDatabase, addHabit, getImportanceLevels } from '@/database/database';
-
+import {
+  initializeDatabase,
+  addHabit,
+  getImportanceLevels,
+} from "@/database/database";
 
 const AgregarHabitosScreen = () => {
-  const [habitName, setHabitName] = useState<string>('');
-  const [habitImportance, setHabitImportance] = useState<number | undefined>(undefined);
-  const [habitDescription, setHabitDescription] = useState<string>('');
-  const [importanceLevels, setImportanceLevels] = useState<{ id: number; nombre: string }[]>([]);
+  const [habitName, setHabitName] = useState<string>("");
+  const [habitImportance, setHabitImportance] = useState<number | undefined>(
+    undefined
+  );
+  const [habitDescription, setHabitDescription] = useState<string>("");
+  const [importanceLevels, setImportanceLevels] = useState<
+    { id: number; nombre: string }[]
+  >([]);
 
   useEffect(() => {
     const setupDatabase = async () => {
@@ -33,7 +47,7 @@ const AgregarHabitosScreen = () => {
 
   const handleAddHabit = async () => {
     if (!habitName || habitImportance === undefined) {
-      Alert.alert('Error', 'Por favor completa todos los campos.');
+      Alert.alert("Error", "Por favor completa todos los campos.");
       return;
     }
 
@@ -43,24 +57,29 @@ const AgregarHabitosScreen = () => {
       console.log("ID de usuario:", userId); // Para verificar que se obtiene el ID correctamente
 
       if (!userId) {
-        Alert.alert('Error', 'No se encontró el ID de usuario.');
+        Alert.alert("Error", "No se encontró el ID de usuario.");
         return;
       }
 
       // Llamar a addHabit con el ID de usuario
-      const success = await addHabit(userId, habitName, habitImportance, habitDescription);
+      const success = await addHabit(
+        userId,
+        habitName,
+        habitImportance,
+        habitDescription
+      );
       if (success) {
-        Alert.alert('Éxito', `Hábito agregado con éxito.`);
+        Alert.alert("Éxito", `Hábito agregado con éxito.`);
         // Limpiar los campos
-        setHabitName('');
+        setHabitName("");
         setHabitImportance(undefined);
-        setHabitDescription('');
+        setHabitDescription("");
       } else {
-        Alert.alert('Error', 'Error al agregar hábito.');
+        Alert.alert("Error", "Error al agregar hábito.");
       }
     } catch (error) {
       console.error("Error al agregar hábito:", error);
-      Alert.alert('Error', 'Hubo un problema al agregar el hábito.');
+      Alert.alert("Error", "Hubo un problema al agregar el hábito.");
     }
   };
 
@@ -70,43 +89,53 @@ const AgregarHabitosScreen = () => {
       headerImage={
         <Image
           source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.headerImage} 
+          style={styles.headerImage}
         />
       }
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type='title'>Agregar nuevos hábitos con validación</ThemedText>
+        <ThemedText type="title">
+          Agregar nuevos hábitos con validación
+        </ThemedText>
       </ThemedView>
-      
+
       <View style={styles.formContainer}>
         <ThemedInput
           placeholder="Nombre del hábito"
           value={habitName}
           onChangeText={setHabitName}
         />
-        
+
         {/* Contenedor para el Picker con borde blanco */}
-        <View style={styles.pickerContainer}>
+        <ThemedView style={styles.pickerContainer}>
           <ThemedPicker
             selectedValue={habitImportance}
             onValueChange={(itemValue) => {
-              const value = itemValue !== undefined ? Number(itemValue) : undefined;
+              const value =
+                itemValue !== undefined ? Number(itemValue) : undefined;
               setHabitImportance(value);
             }}
           >
-            <Picker.Item label="Seleccione un nivel de importancia" value={undefined} />
-            {importanceLevels.map(level => (
-              <Picker.Item key={level.id} label={level.nombre} value={level.id} />
+            <Picker.Item
+              label="Seleccione un nivel de importancia"
+              value={undefined}
+            />
+            {importanceLevels.map((level) => (
+              <Picker.Item
+                key={level.id}
+                label={level.nombre}
+                value={level.id}
+              />
             ))}
           </ThemedPicker>
-        </View>
+        </ThemedView>
 
         <ThemedInput
           placeholder="Descripción"
           value={habitDescription}
           onChangeText={setHabitDescription}
         />
-        
+
         <Button title="Agregar Hábito" onPress={handleAddHabit} />
       </View>
     </ParallaxScrollView>
@@ -115,37 +144,36 @@ const AgregarHabitosScreen = () => {
 
 const styles = StyleSheet.create({
   headerImage: {
-    width: '100%',
+    width: "100%",
     height: 200,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   titleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     paddingVertical: 20,
   },
   title: {
     fontSize: 24,
-    color: '#FFFFFF', 
+    color: "#FFFFFF",
   },
   formContainer: {
     padding: 16,
   },
   input: {
     height: 40,
-    borderColor: '#FFFFFF',
-    color: '#FFFFFF', 
+    borderColor: "#FFFFFF",
+    color: "#FFFFFF",
     borderWidth: 1,
     marginBottom: 12,
     paddingHorizontal: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
   pickerContainer: {
     borderRadius: 5,
     marginBottom: 12,
-    overflow: 'hidden', 
+    overflow: "hidden",
   },
-
 });
 
 export default AgregarHabitosScreen;
