@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AntDesign from '@expo/vector-icons/AntDesign';
 import {
   StyleSheet,
   Alert,
@@ -157,7 +158,7 @@ export default function DetallesHabitosScreen() {
         }
       >
         <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Detalles del Hábito</ThemedText>
+          <ThemedText type="subtitle" style={{ marginTop: 40 }}>Detalles del Hábito</ThemedText>
           <TouchableOpacity onPress={loadHabits} style={styles.refreshButton}>
             <Icon name="refresh-outline" size={24} color={iconColor} />
           </TouchableOpacity>
@@ -169,19 +170,21 @@ export default function DetallesHabitosScreen() {
                   {item.descripcion}
                 </ThemedText>
               </View>
-              <TouchableOpacity
-                onPress={() => openUpdateModal(item)}
-                style={styles.button}
-              >
-                <ThemedText style={styles.buttonText}>Actualizar</ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleDelete(item.id)}
-                style={[styles.button, styles.deleteButton]}
-              >
-                <ThemedText style={styles.buttonText}>Eliminar</ThemedText>
-              </TouchableOpacity>
-              <ImportanceChip level={item.idNivelImportancia} />
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  onPress={() => openUpdateModal(item)}
+                  style={[styles.button, styles.editButtonIcon]}
+                >
+                  <AntDesign name="edit" size={24} color="green" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleDelete(item.id)}
+                  style={[styles.button, styles.deleteButtonIcon]}
+                >
+                  <AntDesign name="delete" size={24} color="red" />
+                </TouchableOpacity>
+              </View>
+              {/* <ImportanceChip level={item.idNivelImportancia} /> */}
             </TouchableOpacity>
           ))}
           {/* Modal para actualizar hábitos */}
@@ -193,7 +196,7 @@ export default function DetallesHabitosScreen() {
           >
             <ThemedView style={styles.modalContainer}>
               <ThemedView style={styles.modalContent}>
-                <ThemedText type="title">Actualizar Hábito</ThemedText>
+                <ThemedText type="subtitle" style={styles.modalTitle}>Actualizar Hábito</ThemedText>
                 <ThemedInput
                   placeholder="Nombre del hábito"
                   value={nombre}
@@ -226,17 +229,17 @@ export default function DetallesHabitosScreen() {
                     ))}
                   </ThemedPicker>
                 </ThemedView>
-                <TouchableOpacity style={styles.button} onPress={handleUpdate}>
-                  <ThemedText style={styles.buttonText}>
-                    Guardar Cambios
-                  </ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.button, styles.deleteButton]}
-                  onPress={() => setModalVisible(false)}
-                >
-                  <ThemedText style={styles.buttonText}>Cancelar</ThemedText>
-                </TouchableOpacity>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity style={[styles.button, styles.flexButton]} onPress={handleUpdate}>
+                    <ThemedText style={styles.buttonText}>Guardar</ThemedText>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.button, styles.cancelButton, styles.flexButton]}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <ThemedText style={styles.buttonText}>Cancelar</ThemedText>
+                  </TouchableOpacity>
+                </View>
               </ThemedView>
             </ThemedView>
           </Modal>
@@ -277,9 +280,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
     marginLeft: 5,
+    alignItems: "center",
   },
   deleteButton: {
-    backgroundColor: "#FF4C4C",
+    backgroundColor: "red",
+  },
+  deleteButtonIcon: {
+    backgroundColor: "white",
+    borderColor: "red",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginHorizontal: 0,
+  },
+  editButtonIcon: {
+    backgroundColor: "white",
+    borderColor: "green",
+    borderWidth: 1,
+    borderRadius: 5,
   },
   buttonText: {
     color: "#FFFFFF",
@@ -301,10 +318,10 @@ const styles = StyleSheet.create({
     elevation: 2,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
   },
   habitContent: {
-    marginRight: 10,
+    flex: 1,
   },
   habitName: {
     fontSize: 18,
@@ -326,10 +343,38 @@ const styles = StyleSheet.create({
     width: "80%",
     paddingVertical: "20%",
     paddingHorizontal: "10%",
+    borderRadius: 10,
+    shadowColor: "#000",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 30,
+    marginTop: -10,
+    textAlign: "center",
   },
   pickerContainer: {
-    borderRadius: 5,
-    marginBottom: 12,
-    overflow: "hidden",
+    width: "100%",
+    marginBottom: 15,
   },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: 20,
+   
+  },
+  cancelButton: {
+    backgroundColor: "red",
+    borderColor: "red",
+    borderWidth: 1,
+    
+  },
+  flexButton: {
+    flex: 0.5,
+    marginHorizontal: 5, 
+    alignItems: 'center',
+  },
+  
+
 });
