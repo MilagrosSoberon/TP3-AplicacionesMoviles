@@ -70,20 +70,16 @@ export default function HomeScreen() {
       </ThemedView>
 
       {/* Lista de hábitos */}
-      <FlatList
-        data={habits}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.habitItem}>
-            <View style={styles.habitContent}>
-              <ThemedText style={styles.habitName}>{item.nombre}</ThemedText>
-              <ThemedText style={styles.habitDescription}>{item.descripcion}</ThemedText>
-            </View>
-            {/* chip de importancia */}
-            <ImportanceChip level={item.idNivelImportancia} />
-          </TouchableOpacity>
-        )}
-      />
+      {habits.map(item => (
+        <TouchableOpacity key={item.id} style={styles.habitItem}>
+          <View style={styles.habitContent}>
+            <ThemedText style={styles.habitName}>{item.nombre}</ThemedText>
+            <ThemedText style={styles.habitDescription}>{item.descripcion}</ThemedText>
+          </View>
+          <ImportanceChip level={item.idNivelImportancia} />
+        </TouchableOpacity>
+      ))}
+     
 
     </ParallaxScrollView>
   );
