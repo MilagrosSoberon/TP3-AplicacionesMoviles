@@ -6,6 +6,7 @@ import { ThemedView } from '@/components/ThemedView';
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { initializeDatabase, addHabit, getImportanceLevels } from '@/database/database';
 import { Picker } from '@react-native-picker/picker';
+import { ThemedInput } from '@/components/ThemedInput';
 
 const AgregarHabitosScreen = () => {
   const [habitName, setHabitName] = useState<string>('');
@@ -56,10 +57,8 @@ const AgregarHabitosScreen = () => {
       </ThemedView>
       
       <View style={styles.formContainer}>
-        <TextInput
-          style={styles.input}
+        <ThemedInput
           placeholder="Nombre del hábito"
-          placeholderTextColor="#FFFFFF" 
           value={habitName}
           onChangeText={setHabitName}
         />
@@ -78,10 +77,8 @@ const AgregarHabitosScreen = () => {
           </Picker>
         </View>
 
-        <TextInput
-          style={styles.input}
+        <ThemedInput
           placeholder="Descripción"
-          placeholderTextColor="#FFFFFF"
           value={habitDescription}
           onChangeText={setHabitDescription}
         />
