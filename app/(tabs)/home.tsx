@@ -53,13 +53,11 @@ export default function HomeScreen() {
   try {
     // Obtener el Firebase ID del almacenamiento
     const firebaseId = await AsyncStorage.getItem("userId");
-    console.log("Número Usuario de Firebase:", firebaseId);
 
     if (firebaseId) {
       // Usar el firebaseId para obtener los hábitos
       const fetchedHabits = await getHabitByIdUser(firebaseId); 
-      console.log("Hábitos recuperados:", fetchedHabits); 
-
+      console.log("Hábitos obtenidos:", fetchedHabits);
       if (fetchedHabits && fetchedHabits.length > 0) {
         setHabits(fetchedHabits); // Establece los hábitos
       } else {

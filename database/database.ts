@@ -7,18 +7,17 @@ export const initializeDatabase = async () => {
   const database = await db;
 
   // empezar de 0
-    // try {
-    //   // await database.execAsync(`DROP TABLE IF EXISTS Registro;`);
-    //   // await database.execAsync(`DROP TABLE IF EXISTS Habito;`);
-    //   await database.execAsync(`DROP TABLE IF EXISTS Usuario;`);
-    //   //await database.execAsync(`DROP TABLE IF EXISTS NivelImportancia;`);
+  // try {
+  //   // await database.execAsync(`DROP TABLE IF EXISTS Registro;`);
+  //   // await database.execAsync(`DROP TABLE IF EXISTS Habito;`);
+  //   await database.execAsync(`DROP TABLE IF EXISTS Usuario;`);
+  //   //await database.execAsync(`DROP TABLE IF EXISTS NivelImportancia;`);
 
-    //   console.log('Todas las tablas han sido eliminadas con éxito');
-    // } catch (error) {
-    //   console.error('Error al eliminar las tablas:', error);
-    // }
+  //   console.log('Todas las tablas han sido eliminadas con éxito');
+  // } catch (error) {
+  //   console.error('Error al eliminar las tablas:', error);
+  // }
   // };
-
 
   await database.execAsync(
     `CREATE TABLE IF NOT EXISTS Habito (
@@ -129,7 +128,6 @@ export const getHabitById = async (id: number): Promise<Habit | null> => {
 
 export const getHabitByIdUser = async (idUsuario: string): Promise<Habit[]> => {
   const database = await db;
-  console.log("ID USER", idUsuario);
   try {
     const result = await database.getAllAsync(
       "SELECT * FROM Habito WHERE idUsuario = ?",
@@ -172,14 +170,15 @@ export const addHabit = async (
 
 export const updateHabit = async (
   id: number,
+  habitImportance: number,
   nombre: string,
   descripcion: string
 ): Promise<boolean> => {
   const database = await db;
   try {
     await database.runAsync(
-      "UPDATE Habito SET nombre = ?, descripcion = ? WHERE id = ?",
-      [nombre, descripcion, id]
+      "UPDATE Habito SET idNivelImportancia= ?, nombre = ?, descripcion = ? WHERE id = ?",
+      [habitImportance, nombre, descripcion, id]
     );
     return true;
   } catch (error) {
@@ -251,7 +250,7 @@ export const updateFirebaseId = async (
   firebaseId: string
 ): Promise<boolean> => {
   const database = await db;
-  
+
   try {
     await database.runAsync(
       "UPDATE Usuario SET firebaseId = ? WHERE email = ?",
@@ -264,11 +263,16 @@ export const updateFirebaseId = async (
   }
 };
 
-export const getNumericIdByFirebaseId = async (firebaseId: string): Promise<number | null> => {
+export const getNumericIdByFirebaseId = async (
+  firebaseId: string
+): Promise<number | null> => {
   const database = await db;
 
   try {
-    const result = await database.getFirstAsync<{ id: number }>('SELECT id FROM Usuario WHERE firebaseId = ?', [firebaseId]);
+    const result = await database.getFirstAsync<{ id: number }>(
+      "SELECT id FROM Usuario WHERE firebaseId = ?",
+      [firebaseId]
+    );
     console.log("el id con el firebase es:", result); // Log del resultado de la consulta
     return result ? result.id : null; // Devuelve el ID numérico si se encuentra, o null
   } catch (error) {
@@ -276,14 +280,22 @@ export const getNumericIdByFirebaseId = async (firebaseId: string): Promise<numb
     return null; // Retorna null en caso de error
   }
 };
-export const getUserByFirebaseId = async (firebaseId: string): Promise<Usuario | null> => {
+export const getUserByFirebaseId = async (
+  firebaseId: string
+): Promise<Usuario | null> => {
   const database = await db;
   try {
-      const result = await database.getFirstAsync('SELECT * FROM Usuario WHERE firebaseId = ?', [firebaseId]);
-      console.log("Usuario encontrado por -getUserByFirebaseId- Firebase ID:", result); // Log del usuario encontrado
-      return result ? (result as Usuario) : null; // Devuelve el usuario encontrado o null
+    const result = await database.getFirstAsync(
+      "SELECT * FROM Usuario WHERE firebaseId = ?",
+      [firebaseId]
+    );
+    console.log(
+      "Usuario encontrado por -getUserByFirebaseId- Firebase ID:",
+      result
+    ); // Log del usuario encontrado
+    return result ? (result as Usuario) : null; // Devuelve el usuario encontrado o null
   } catch (error) {
-      console.error("Error al obtener el usuario por Firebase ID:", error);
-      return null;
+    console.error("Error al obtener el usuario por Firebase ID:", error);
+    return null;
   }
 };

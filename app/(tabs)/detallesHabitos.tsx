@@ -58,7 +58,6 @@ export default function DetallesHabitosScreen() {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
 
-
   // carga los habitos
   const loadHabits = async () => {
     try {
@@ -86,9 +85,9 @@ export default function DetallesHabitosScreen() {
 
   const loadHabitImportance = async () => {
     const levels = await getImportanceLevels();
-      setImportanceLevels(levels);
+    setImportanceLevels(levels);
   };
-  
+
   useEffect(() => {
     loadHabits();
     loadHabitImportance();
