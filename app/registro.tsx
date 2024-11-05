@@ -13,12 +13,16 @@ import { ThemedInput } from "@/components/ThemedInput";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../assets/types";
-import { addUser } from '@/database/database'; 
 import SHA256 from 'crypto-js/sha256'; 
+
+//firebase
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 //validacion
 import validarDataRegistroUsuario  from '../components/validaciones/validarDataRegistroUsuario';
+
+//data
+import { addUser } from '@/database/database'; 
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, "index">;
 
@@ -47,13 +51,14 @@ const Registro = () => {
 
         // Crear el usuario en Firebase
         const userCredential = await createUserWithEmailAndPassword(auth, email, password); 
-        
-        // Agregar el usuario a la base de datos local
-        const success = await addUser(nombre, email, numeroCelular, hashedPassword);
-        if (!success) {
-            Alert.alert('Error', 'El usuario fue registrado en Firebase, pero no se pudo guardar en la base de datos local.');
-            return;
-        }
+        const firebaseId = userCredential.user.uid; // Obtiene el firebaseId
+
+       // Agregar el usuario a la base de datos local, incluyendo el firebaseId
+       const success = await addUser(nombre, email, numeroCelular, hashedPassword, firebaseId);
+       if (!success) {
+           Alert.alert('Error', 'El usuario fue registrado en Firebase, pero no se pudo guardar en la base de datos local.');
+           return;
+       }
 
         Alert.alert(
             "Registro exitoso",
