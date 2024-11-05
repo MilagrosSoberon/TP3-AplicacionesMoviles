@@ -15,9 +15,10 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../assets/types";
 import { addUser } from '@/database/database'; 
 import SHA256 from 'crypto-js/sha256'; 
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 //validacion
-import validarDataRegistroUsuario  from '@/validaciones/validarRegistro';
+import validarDataRegistroUsuario  from '../components/validaciones/validarDataRegistroUsuario';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, "index">;
 
@@ -33,29 +34,41 @@ const Registro = () => {
   const handleRegistro = async () => {
     // Validar los datos del registro
     if (!validarDataRegistroUsuario(nombre, email, numeroCelular, password)) {
-      Alert.alert('Error', 'Por favor completa todos los campos correctamente. Asegúrate de que la contraseña tenga al menos 8 caracteres, incluya números y al menos una mayúscula. Además, verifica que el email sea válido y termine en .com.');
-      return;
+        Alert.alert('Error', 'Por favor completa todos los campos correctamente. Asegúrate de que la contraseña tenga al menos 8 caracteres, incluya números y al menos una mayúscula. Además, verifica que el email sea válido y termine en .com.');
+        return;
     }
+
     // Hashear la contraseña
     const hashedPassword = SHA256(password).toString();
 
-    // Crear el usuario en la bd
-    const success = await addUser(nombre, email, numeroCelular, hashedPassword);
-    
-    if (success) {
-      Alert.alert(
-        "Registro exitoso",
-        `Nombre: ${nombre}\nEmail: ${email}\nNúmero Celular: ${numeroCelular}`
-      );
+    try {
+        // Inicializar Firebase Auth
+        const auth = getAuth(); 
 
-      // Espera 2 segundos antes de navegar
-      setTimeout(() => {
-        navigation.navigate("index");
-      }, 800);
-    } else {
-      Alert.alert('Error', 'No se pudo registrar el usuario.');
+        // Crear el usuario en Firebase
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password); 
+        
+        // Agregar el usuario a la base de datos local
+        const success = await addUser(nombre, email, numeroCelular, hashedPassword);
+        if (!success) {
+            Alert.alert('Error', 'El usuario fue registrado en Firebase, pero no se pudo guardar en la base de datos local.');
+            return;
+        }
+
+        Alert.alert(
+            "Registro exitoso",
+            `Nombre: ${nombre}\nEmail: ${email}\nNúmero Celular: ${numeroCelular}`
+        );
+
+        // Espera 2 segundos antes de navegar
+        setTimeout(() => {
+            navigation.navigate("index");
+        }, 800);
+    } catch (error) {
+        Alert.alert('Error', 'No se pudo registrar el usuario. ' + (error as Error).message);
     }
-  };
+};
+
 
   return (
     <ParallaxScrollView
