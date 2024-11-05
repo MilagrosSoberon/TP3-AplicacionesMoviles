@@ -126,3 +126,20 @@ type Habit = {
       return [];
     }
   };
+
+  //agregar usuario
+
+  export const addUser = async (nombre: string, email: string, numeroCelular: string, passwordHash: string) => {
+    const database = await db;
+ 
+    try {
+      await database.runAsync(
+        'INSERT INTO Usuario (nombre, email, contraseña) VALUES (?, ?, ?)',
+        [nombre, email, passwordHash]
+      );
+      return true;
+    } catch (error) {
+      console.error("Error al agregar el usuario:", error);
+      return false;
+    }
+ };
