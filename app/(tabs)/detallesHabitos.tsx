@@ -62,12 +62,12 @@ export default function DetallesHabitosScreen() {
   // carga los habitos
   const loadHabits = async () => {
     try {
-      // Obtener el Firebase ID del almacenamiento
+      // Obtiene el Firebase ID del almacenamiento
       const firebaseId = await AsyncStorage.getItem("userId");
       console.log("Número Usuario de Firebase:", firebaseId);
 
       if (firebaseId) {
-        // Usar el firebaseId para obtener los hábitos
+        // Usa el firebaseId para obtener los hábitos
         const fetchedHabits = await getHabitByIdUser(firebaseId);
         console.log("Hábitos recuperados:", fetchedHabits);
 
@@ -112,7 +112,8 @@ export default function DetallesHabitosScreen() {
     Alert.alert("Éxito", "Hábito actualizado con éxito.");
     loadHabits();
     setModalVisible(false); // Cerrar modal
-    setNombre(""); // Resetear campos
+    // Resetear campos
+    setNombre(""); 
     setDescripcion("");
     setHabitImportance(undefined);
     setSelectedHabit(null);

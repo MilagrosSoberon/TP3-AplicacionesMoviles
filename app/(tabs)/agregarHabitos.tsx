@@ -16,7 +16,7 @@ import { ThemedInput } from "@/components/ThemedInput";
 import { ThemedPicker } from "@/components/ThemedPicker";
 
 //firebase
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Asegúrate de importar AsyncStorage
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
 
 //data
 import {
@@ -52,16 +52,16 @@ const AgregarHabitosScreen = () => {
     }
 
     try {
-      // Obtener el ID del usuario desde AsyncStorage
+      // Obtiene el ID del usuario desde AsyncStorage
       const userId = await AsyncStorage.getItem("userId");
-      console.log("ID de usuario:", userId); // Para verificar que se obtiene el ID correctamente
+      console.log("ID de usuario:", userId); 
 
       if (!userId) {
         Alert.alert("Error", "No se encontró el ID de usuario.");
         return;
       }
 
-      // Llamar a addHabit con el ID de usuario
+      // Llama a addHabit con el ID de usuario
       const success = await addHabit(
         userId,
         habitName,

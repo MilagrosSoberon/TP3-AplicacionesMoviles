@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  Image,
-  View,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
+import { Image, View, StyleSheet, Alert, TouchableOpacity } from "react-native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -13,18 +7,21 @@ import { ThemedInput } from "@/components/ThemedInput";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../assets/types";
-import SHA256 from 'crypto-js/sha256'; 
+import SHA256 from "crypto-js/sha256";
 
 //firebase
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 //validacion
-import validarDataRegistroUsuario  from '../components/validaciones/validarDataRegistroUsuario';
+import validarDataRegistroUsuario from "../components/validaciones/validarDataRegistroUsuario";
 
 //data
-import { addUser } from '@/database/database'; 
+import { addUser } from "@/database/database";
 
-type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, "index">;
+type LoginScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "index"
+>;
 
 const Registro = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
@@ -36,44 +33,62 @@ const Registro = () => {
   const [showPassword, setShowPassword] = useState(false); //  mostrar/ocultar contraseña
 
   const handleRegistro = async () => {
-    // Validar los datos del registro
+    // Valida los datos del registro
     if (!validarDataRegistroUsuario(nombre, email, numeroCelular, password)) {
-        Alert.alert('Error', 'Por favor completa todos los campos correctamente. Asegúrate de que la contraseña tenga al menos 8 caracteres, incluya números y al menos una mayúscula. Además, verifica que el email sea válido y termine en .com.');
-        return;
+      Alert.alert(
+        "Error",
+        "Por favor completa todos los campos correctamente. Asegúrate de que la contraseña tenga al menos 8 caracteres, incluya números y al menos una mayúscula. Además, verifica que el email sea válido y termine en .com."
+      );
+      return;
     }
 
     // Hashear la contraseña
     const hashedPassword = SHA256(password).toString();
 
     try {
-        // Inicializar Firebase Auth
-        const auth = getAuth(); 
+      // Inicializar Firebase Auth
+      const auth = getAuth();
 
-        // Crear el usuario en Firebase
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password); 
-        const firebaseId = userCredential.user.uid; // Obtiene el firebaseId
+      // Crea el usuario en Firebase
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const firebaseId = userCredential.user.uid; // Obtiene el firebaseId
 
-       // Agregar el usuario a la base de datos local, incluyendo el firebaseId
-       const success = await addUser(nombre, email, numeroCelular, hashedPassword, firebaseId);
-       if (!success) {
-           Alert.alert('Error', 'El usuario fue registrado en Firebase, pero no se pudo guardar en la base de datos local.');
-           return;
-       }
-
+      // Agrega el usuario a la base de datos local, incluyendo el firebaseId
+      const success = await addUser(
+        nombre,
+        email,
+        numeroCelular,
+        hashedPassword,
+        firebaseId
+      );
+      if (!success) {
         Alert.alert(
-            "Registro exitoso",
-            `Nombre: ${nombre}\nEmail: ${email}\nNúmero Celular: ${numeroCelular}`
+          "Error",
+          "El usuario fue registrado en Firebase, pero no se pudo guardar en la base de datos local."
         );
+        return;
+      }
 
-        // Espera 2 segundos antes de navegar
-        setTimeout(() => {
-            navigation.navigate("index");
-        }, 800);
+      Alert.alert(
+        "Registro exitoso",
+        `Nombre: ${nombre}\nEmail: ${email}\nNúmero Celular: ${numeroCelular}`
+      );
+
+      // Espera 2 segundos antes de navegar
+      setTimeout(() => {
+        navigation.navigate("index");
+      }, 800);
     } catch (error) {
-        Alert.alert('Error', 'No se pudo registrar el usuario. ' + (error as Error).message);
+      Alert.alert(
+        "Error",
+        "No se pudo registrar el usuario. " + (error as Error).message
+      );
     }
-};
-
+  };
 
   return (
     <ParallaxScrollView
@@ -108,8 +123,8 @@ const Registro = () => {
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry={!showPassword} // Controlar si se debe ocultar la contraseña
-          showPasswordToggle={true} 
+          secureTextEntry={!showPassword} // Control si se debe ocultar la contraseña
+          showPasswordToggle={true}
           onToggleShowPassword={() => setShowPassword(!showPassword)} // Alternar visibilidad
         />
 
@@ -133,7 +148,7 @@ const styles = StyleSheet.create({
   },
   reactLogo: {
     height: 178,
-    width: '80%',
+    width: "80%",
     bottom: 0,
     left: 0,
     position: "absolute",

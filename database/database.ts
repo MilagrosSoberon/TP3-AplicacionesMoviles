@@ -110,11 +110,10 @@ export const getHabits = async (): Promise<Habit[]> => {
     return [];
   }
 };
-// database.ts
+
 export const getHabitById = async (id: number): Promise<Habit | null> => {
   const database = await db;
   try {
-    // Llama a getFirstAsync con la consulta y los parámetros
     const result = await database.getFirstAsync(
       "SELECT * FROM Habito WHERE id = ?",
       [id]
@@ -136,7 +135,7 @@ export const getHabitByIdUser = async (idUsuario: string): Promise<Habit[]> => {
 
     // Verifica que result sea un arreglo y cada elemento sea del tipo Habit
     if (Array.isArray(result)) {
-      return result.map((item) => item as Habit); // Asegúrate de que cada elemento sea del tipo Habit
+      return result.map((item) => item as Habit);
     } else {
       console.warn("Se esperaba un arreglo, pero se obtuvo:", result);
       return []; // Devuelve un arreglo vacío si no es un arreglo
@@ -212,10 +211,9 @@ export const getUsuarios = async (): Promise<Usuario[]> => {
   const database = await db;
 
   try {
-    // Cambia la consulta para seleccionar de la tabla Usuario
     const result = await database.getAllAsync("SELECT * FROM Usuario");
     console.log("Usuarios obtenidos:", result);
-    return result as Usuario[]; // Asegúrate de que el resultado se ajuste a la interfaz Usuario
+    return result as Usuario[];
   } catch (error) {
     console.error("Error al obtener los usuarios:", error);
     return []; // Retorna un arreglo vacío en caso de error

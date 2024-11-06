@@ -51,11 +51,11 @@ export default function HomeScreen() {
   // carga los habitos
  const loadHabits = async () => {
   try {
-    // Obtener el Firebase ID del almacenamiento
+    // Obtiene el Firebase ID del almacenamiento
     const firebaseId = await AsyncStorage.getItem("userId");
 
     if (firebaseId) {
-      // Usar el firebaseId para obtener los hábitos
+      // Usa el firebaseId para obtener los hábitos
       const fetchedHabits = await getHabitByIdUser(firebaseId); 
       console.log("Hábitos obtenidos:", fetchedHabits);
       if (fetchedHabits && fetchedHabits.length > 0) {

@@ -1,10 +1,5 @@
-import React, { useState} from "react";
-import {
-  Image,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
+import React, { useState } from "react";
+import { Image, StyleSheet, Alert, TouchableOpacity } from "react-native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -14,15 +9,15 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../assets/types";
 
 //firebase
-import { signInWithEmailAndPassword } from "firebase/auth"; 
-import { auth } from "../firebaseConfig"; 
-import AsyncStorage from "@react-native-async-storage/async-storage"; 
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //componentes
 import validarDataLogin from "../components/validaciones/validarDataLogin";
 
 //data
-import {getUserByFirebaseId } from "@/database/database";
+import { getUserByFirebaseId } from "@/database/database";
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -40,25 +35,32 @@ const Login = () => {
 
     try {
       //Firebase
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const firebaseId = userCredential.user.uid; // Obtiene el ID de Firebase
       const token = await userCredential.user.getIdToken(); //token JWT
 
       // almaceno token
       await AsyncStorage.setItem("userToken", token);
 
-      // Obtener el usuario de la base de datos local usando el firebaseId
-      const user = await getUserByFirebaseId(firebaseId); 
+      // Obtiene el usuario de la base de datos local usando el firebaseId
+      const user = await getUserByFirebaseId(firebaseId);
 
       if (user) {
         await AsyncStorage.setItem("userId", user.id.toString());
         console.log("Usuario recuperado:", user);
-    } else {
+      } else {
         console.warn("No se encontró el usuario en la base de datos local");
-    }
-      navigation.navigate("(tabs)"); 
+      }
+      navigation.navigate("(tabs)");
     } catch (error) {
-      Alert.alert("Error, la combinación de usuario y contraseña es incorrecta", (error as Error).message); 
+      Alert.alert(
+        "Error, la combinación de usuario y contraseña es incorrecta",
+        (error as Error).message
+      );
     }
   };
 
@@ -84,13 +86,13 @@ const Login = () => {
           onChangeText={setEmail}
           keyboardType="email-address"
         />
-       
+
         <ThemedInput
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry={!showPassword} // Controlar si se debe ocultar la contraseña
-          showPasswordToggle={true} 
+          secureTextEntry={!showPassword} // control si se debe ocultar la contraseña
+          showPasswordToggle={true}
           onToggleShowPassword={() => setShowPassword(!showPassword)} // Alternar visibilidad
         />
 
@@ -123,7 +125,7 @@ const styles = StyleSheet.create({
   },
   reactLogo: {
     height: 178,
-    width: '80%',
+    width: "80%",
     bottom: 10,
     left: 0,
     position: "absolute",
